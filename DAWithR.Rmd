@@ -17,11 +17,17 @@ library(ggplot2)
 # Load the Data
 data = read.csv('wineQualityWhites.csv')
 
+#names of variables
+names(data)
+
 #dimensions of data
 dim(data)
 
 #variables information
 str(data)
+
+#convert quality data as factored
+data$quality <- as.factor(data$quality)
 
 ```
 Only the quality column which tells about the average quality of Wines can be used a  categorical column in first pass. Others look like continuous values. Let's see each of them one by one.
@@ -33,9 +39,43 @@ Only the quality column which tells about the average quality of Wines can be us
 qplot(quality,data=data, geom="histogram")
 
 summary(data$quality)
+```
+Most the wines are of average quality. So we have few data points to delve into qualities. 
 
+```{r echo=FALSE}
+qplot(fixed.acidity, data = data, geom="histogram")
+summary(data$fixed.acidity)
+
+qplot(volatile.acidity, data = data, geom="histogram")
+summary(data$volatile.acidity)
+
+qplot(citric.acid, data = data, geom="histogram")
+summary(data$citric.acid)
+
+qplot(chlorides, data = data, geom="histogram")
+summary(data$chlorides)
+
+qplot(free.sulfur.dioxide, data = data, geom="histogram")
+summary(data$free.sulphur.dioxide)
+
+
+qplot(density, data = data, geom="histogram")
+summary(data$density)
+
+
+qplot(pH, data = data, geom="histogram")
+summary(data$pH)
+
+
+qplot(sulphates, data = data, geom="histogram")
+summary(data$sulphates)
+
+
+qplot(alcohol, data = data, geom="histogram")
+summary(data$alcohol)
 
 ```
+
 
 # Univariate Analysis
 

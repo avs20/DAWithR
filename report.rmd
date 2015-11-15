@@ -1,12 +1,12 @@
 ---
-title: "Exploratory Analysis of Red Wines Quality"
+title: "Exploratory Analysis of White Wines Quality"
 author: "Ashutosh Singh"
 date: "Friday, September 18, 2015"
 output:
   html_document:
     highlight: tango
     theme: cerulean
----
+---''8.,
 ###1. Introduction
 This tidy data set contains 1,599 red wines with 11 variables on the chemical properties of the wine. At least 3 wine experts rated the quality of each wine, providing a rating between 0 (very bad) and 10 (very excellent).
 

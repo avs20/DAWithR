@@ -11,6 +11,22 @@ by Ashutosh Singh
 # You should set echo=FALSE for all code chunks in your file.
 
 library(ggplot2)
+
+
+###some useful functions 
+## Remove outliers 
+## source : http://stackoverflow.com/a/4788102
+
+remove_outliers <- function(x, na.rm = TRUE, ...) {
+  qnt <- quantile(x, probs=c(.25, .75), na.rm = na.rm, ...)
+  H <- 1.5 * IQR(x, na.rm = na.rm)
+  y <- x
+  y[x < (qnt[1] - H)] <- NA
+  y[x > (qnt[2] + H)] <- NA
+  y
+}
+
+
 ```
 
 ```{r echo=FALSE, Load_the_Data}
@@ -43,58 +59,206 @@ summary(data$quality)
 Most the wines are of average quality. So we have few data points to delve into qualities. 
 
 ```{r echo=FALSE}
-qplot(fixed.acidity, data = data, geom="histogram")
+library(gridExtra)
+
+p1 <- qplot(fixed.acidity, data = data, geom="histogram")
 summary(data$fixed.acidity)
 
-qplot(volatile.acidity, data = data, geom="histogram")
-summary(data$volatile.acidity)
+p2 <- qplot(volatile.acidity, data = data, geom="histogram")
+#summary(data$volatile.acidity)
 
-qplot(citric.acid, data = data, geom="histogram")
-summary(data$citric.acid)
+p3 <- qplot(citric.acid, data = data, geom="histogram")
+#summary(data$citric.acid)
 
-qplot(chlorides, data = data, geom="histogram")
-summary(data$chlorides)
+p4 <- qplot(chlorides, data = data, geom="histogram")
+#summary(data$chlorides)
 
-qplot(free.sulfur.dioxide, data = data, geom="histogram")
-summary(data$free.sulphur.dioxide)
-
-
-qplot(density, data = data, geom="histogram")
-summary(data$density)
+p5 <- qplot(free.sulfur.dioxide, data = data, geom="histogram")
+#summary(data$free.sulphur.dioxide)
 
 
-qplot(pH, data = data, geom="histogram")
-summary(data$pH)
+p6 <- qplot(density, data = data, geom="histogram")
+#summary(data$density)
 
 
-qplot(sulphates, data = data, geom="histogram")
-summary(data$sulphates)
+p7 <- qplot(pH, data = data, geom="histogram")
+#summary(data$pH)
 
 
-qplot(alcohol, data = data, geom="histogram")
-summary(data$alcohol)
+p8 <- qplot(sulphates, data = data, geom="histogram")
+#summary(data$sulphates)
+
+
+p9 <- qplot(alcohol, data = data, geom="histogram")
+#summary(data$alcohol)
+
+p10 <- qplot(residual.sugar, data=data, geom="histogram")
+
+
+#arrange the plots 
+grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,ncol=3)
+
 
 ```
+
+The residual sugar histogram is skewed so plotting it in log transformation we get 
+```{r Residual Sugar transform} 
+
+qplot(data = data, x = residual.sugar , geom="histogram")+
+  scale_x_log10()
+
+```
+There exists a bimodal distribution. Residual sugar is what is left when the fragmentation stops. 
+
+
 
 
 # Univariate Analysis
 
 ### What is the structure of your dataset?
+The data contains 4898 observations of white wine and their physiochemical analysis as features. A total of 11 features are used and the quality variable is used as output which also serves as a categorical variable.
+
+All features except quality are continuous.The quality feature domain is from 0 to 10 but the range is available from 3 to 9. The quality of wine is subjective so an average was used to depict quality by atleast 3 observers.
 
 ### What is/are the main feature(s) of interest in your dataset?
+The quality feature rises to the top as I have only seen in movies that they get the quality of wine by some ritual. Also since I have never tasted wine and as an engineer I thought of predicting the quality of wine by its features. 
+Residual sugar also seems interesting as this what makes wines taste sweeter. Also content of residual sugar is maintained and the sulphides are aslo added to preserve the sugar content from further fermentation. 
+
+Last I think most important is alcohol for obvious reasons. 
 
 ### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+
+I think pH value and acidity features should be explored more in association with the quality go wines
 
 ### Did you create any new variables from existing variables in the dataset?
 
 ### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
-
-
+I investigated the residual sugar feature since the data looks skewed in the first pass. I applied the log transformation on it which clearly shows a bimodal relationship between the wines and the sugar after fermentation. 
+The plot shows that mostly the sugar is determined by keeping it low or high.
 
 # Bivariate Plots Section
 ```{r echo=FALSE, Bivariate_Plots}
+library(GGally)
+
+#ggpairs(data = data,columns=2:13)
+
 
 ```
+
+For a quick overview of the data I plotted a scatterplot matrix of the variables to look at the correlation and the distribution with other variables. 
+
+Follwing strong correlations are found 
+
+ - free sulphur dioxide and total sulphur dioxdie (0.616)
+ - alcohol and quality (0.436)
+ - fixed acidity and pH (0.426)
+ - residual sugar and density (0.839)
+
+The scatter plot also shows many outliers here and there so I need to remove the outliers before further processing.
+
+
+```{r echo=FALSE, Remove_Outliers}
+
+#scttter plot of density with pH
+qplot(data = data, x = density, y = pH)+
+  geom_point()
+
+#density shows some outliers so first remove it
+data$density <- remove_outliers(data$density)
+
+qplot(data = data, x = density, y = pH)+
+  geom_point()
+
+```
+
+From the above plot matrix a relationship between density and residual sugar looks linear. Plotting them again 
+
+```{r echo=FALSE}
+
+qplot(data = data , x = density, y = residual.sugar)+
+  geom_point() 
+  
+#data$chlorides <- remove_outliers(data$chlorides)
+
+qplot(data=data,y=density,x= sulphates)+  
+  geom_boxplot()
+
+```
+
+Since our categorical value and also output is only quality. Lets take a look at how the values of different features spread with quality
+
+```{r echo=FALSE, Feature_Box_Plots}
+
+pf1 <- ggplot(data,aes(factor(quality),fixed.acidity))+geom_boxplot() +xlab("quality")
+pf2 <- ggplot(data,aes(factor(quality),volatile.acidity))+geom_boxplot()+xlab("quality")
+pf3 <- ggplot(data,aes(factor(quality),citric.acid))+geom_boxplot()+xlab("quality")
+pf4 <- ggplot(data,aes(factor(quality),residual.sugar))+geom_boxplot()+xlab("quality")
+pf5 <- ggplot(data,aes(factor(quality),chlorides))+geom_boxplot()+xlab("quality")
+pf6 <- ggplot(data,aes(factor(quality),free.sulfur.dioxide))+geom_boxplot()+xlab("quality")
+pf7 <- ggplot(data,aes(factor(quality),total.sulfur.dioxide))+geom_boxplot()+xlab("quality")
+pf8 <- ggplot(data,aes(factor(quality),density))+geom_boxplot()+xlab("quality")
+pf9 <- ggplot(data,aes(factor(quality),pH))+geom_boxplot()+xlab("quality")
+pf10 <- ggplot(data,aes(factor(quality),sulphates))+geom_boxplot()+xlab("quality")
+pf11 <- ggplot(data,aes(factor(quality),alcohol))+geom_boxplot()+xlab("quality")
+
+grid.arrange(pf1,pf2,pf3,pf4,pf5,pf6,pf7,pf8,pf9,pf10,pf11,ncol=3)
+
+```
+
+These box plots give us an average idea of what features change according to quality. Some specific mentions are
+
+* chlorides have low quantity with high quality
+* density is also low for high quality wines
+* alcohol is high for high quality wines
+
+I am still interested in residual sugar due to its bimodal histogram on the log axis.So instead of quality lets look at the scatter plots of residual sugar with other features.
+
+Looking into them in bigger values
+
+```{r echo=FALSE}
+
+data$clean.chlorides <- remove_outliers(data$chlorides)
+
+p1<-qplot(data = data, x = factor(quality), y = clean.chlorides)+
+  geom_boxplot() + xlab("quality") +
+  stat_summary(fun.y=mean, color="red", hape=18,geom="point", size=3,show_guide = TRUE)
+
+p2 <- qplot(data=data, x = factor(quality), y = chlorides)+ geom_boxplot()
+
+grid.arrange(p2,p1, ncol=2)
+
+ggplot(data= data,aes(clean.chlorides,color=quality,group=quality)) + geom_density()
+
+```
+We get a clear picture that high quality rated wines have less chlorides.But the correlation is not straight. Low quality rated wines (quality 3) also have less chlorides than the average. There may be other factors. 
+
+Taking another look at density and quality
+
+```{r echo=FALSE}
+
+data$clean.density <- remove_outliers(data$density)
+
+qplot(data = data, x= factor(quality), y = clean.density )+
+  geom_boxplot()
+
+table(data$quality > 6)
+```
+From the plot and the values we have less data for high quality rate wines : only 1060 but it is evident that high-rated wines have less density than the low rated wines. 
+
+
+And now taking a look at the boxplot of alcohol and quality
+
+```{r echo=FALSE}
+
+data$clean.alcohol <- remove_outliers(data$alcohol)
+
+qplot(data=data, x = factor(quality), y = clean.alcohol)+
+  geom_boxplot()
+
+```
+The intuition was right the alcohol content of the high-rated wines is greater than in low-rated wines.
+
+
 
 # Bivariate Analysis
 
@@ -151,3 +315,6 @@ summary(data$alcohol)
 ------
 
 # Reflection
+
+# References 
+1. https://en.wikipedia.org/wiki/White_wine

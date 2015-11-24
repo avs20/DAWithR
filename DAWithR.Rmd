@@ -1,5 +1,6 @@
 Exploratory Data Analysis of White Wines
 by Ashutosh Singh
+
 ========================================================
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
@@ -227,9 +228,10 @@ p2 <- qplot(data=data, x = factor(quality), y = chlorides)+ geom_boxplot()
 
 grid.arrange(p2,p1, ncol=2)
 
-ggplot(data= data,aes(clean.chlorides,color=quality,group=quality)) + geom_density()
+ggplot(data= data,aes(clean.chlorides,color=quality,fill=quality,group=quality)) + geom_density()
 
 ```
+
 We get a clear picture that high quality rated wines have less chlorides.But the correlation is not straight. Low quality rated wines (quality 3) also have less chlorides than the average. There may be other factors. 
 
 Taking another look at density and quality
@@ -242,6 +244,11 @@ qplot(data = data, x= factor(quality), y = clean.density )+
   geom_boxplot()
 
 table(data$quality > 6)
+
+ggplot(data= data,aes(clean.density,color=quality,fill=quality,group=quality)) +
+  geom_density()
+
+
 ```
 From the plot and the values we have less data for high quality rate wines : only 1060 but it is evident that high-rated wines have less density than the low rated wines. 
 
@@ -255,23 +262,120 @@ data$clean.alcohol <- remove_outliers(data$alcohol)
 qplot(data=data, x = factor(quality), y = clean.alcohol)+
   geom_boxplot()
 
+ggplot(data= data,aes(clean.alcohol,color=quality,fill=quality,group=quality)) +
+  geom_density()
+
 ```
 The intuition was right the alcohol content of the high-rated wines is greater than in low-rated wines.
+
+There seems to be some relation between pH and fixed acidity from the plot matrix above
+
+```{r echo=FALSE}
+
+qplot(data=data,x = pH, y = fixed.acidity) + 
+  ggtitle("pH and fixed.acidity")
+```
+Plotting with noise to remove the overplotting.
+
+```{r echo=FALSE}
+ggplot(data = data,aes(x = pH, y = fixed.acidity))+
+  geom_point(position="jitter", alpha=0.5, size=0.75)+
+  ggtitle("pH and fixed.acidity with linear model") + stat_smooth(se=FALSE, method=lm,col="red")
+
+```
+It looks like a negative correlation between pH and **fixed.acidity** . The above plot also shows a linear regression line. 
+
+```{r echo=FALSE}
+
+data$clean.totol.sulfur.dioxide <- remove_outliers(data$total.sulfur.dioxide)
+
+ggplot(data=data,aes(x=clean.totol.sulfur.dioxide, residual.sugar))+
+  geom_point(position="jitter", alpha=0.5, size=0.75)
+
+```
+There are too many points on the lower side of the residual sugar even after removing the outliers but on the upper side it shows a linear relationship.
+
+Same relationships can also be found in between 
+* alcohol and residual.sugar
+* alcohol and total.sulfur.dioxide
+
+Plots are below
+
+```{r echo=FALSE}
+
+qplot(data=data, x = alcohol, y = residual.sugar)+
+  geom_point(position="jitter", alpha=0.5, size=0.75)+
+  stat_smooth(method="lm", col="red")
+
+qplot(data=data, x = alcohol, y = clean.totol.sulfur.dioxide)+
+  geom_point(position="jitter", alpha=0.5, size=0.75)+
+  stat_smooth(method="lm", col="red")
+
+```
+
 
 
 
 # Bivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+Based on the correlation coefficients between the various pairs the most strong relation ship is found beween the following pairs
+
+Sr No.    Feature1    Feature2      Correlation
+------    --------    ---------     ------------
+1.        pH          fixed.acidity  -0.4258
+2.        total.sulfur.dioxidex residual.sugar 0.4014
+3.        alcohol      sugar          -0.4506
+4.        achohol      total.sulfur.dioxide  -0.4488
+
+
+I have not taken the quality in calculating the correlation as I just wanted to know the correlation between the features themselves.
 
 ### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
 
+Yes, as shown in the plots and the table above, I found some relationships which were not evident directly. Plotting variables helped to look into these in more detail. 
+
+The relationship between the pH value and the fixed.acidity is trivial as pH value is a representation of the acidity. But the relationship between the  total sulfurdioxide and the residual sugar , alcohol and residual sugar may help us in explaining the variance which will be explored in the next section.  
+
+
 ### What was the strongest relationship you found?
+The strongest relationship found was between the free sulfur dioxide and the total sulfur dioxide. This is trivial as both are interdependent. Also their correlation doesn't matter because we one is a part of other and hence they will also lead to multi collinearity problems if we use both of them in a linear model. 
 
-
-
+Other than that the strongest relationship is a negative correlation between the alcohol and residual sugar.
 
 # Multivariate Plots Section
+
+Before starting the multivariate analysis I want to convert more features into categorical values. These are
+
+* alcohol its cut into 8 to 15 with an iterval of 1
+```{r}
+
+data$alcohol.category<-cut(data$alcohol, seq(8,15,1), right=FALSE,labels=c(1:7))
+
+
+#There was overplotting in the default case so added the jitter.
+qplot(data=data,x=quality, y=alcohol.category, color=alcohol.category)+
+geom_point(position="jitter", alpha = 0.5, size=0.75)
+
+```
+
+* residual.sugar
+
+Since the residual.sugar is bimodal on the log10 scale so I convert it into the orders of low and high based on its median.
+
+```{r echo=FALSE}
+qplot(data=data,x=residual.sugar)+
+  scale_x_log10()
+
+summary(data$residual.sugar)
+#median is 5.200 so cut it into high and low with the median
+data$residual.sugar.cat <- cut(data$residual.sugar, c(0,median(data$residual.sugar),max(data$residual.sugar)),labels=c("low","high"))
+summary(data$residual.sugar.cat)
+
+```
+
+* density
+
 
 ```{r echo=FALSE, Multivariate_Plots}
 
@@ -318,3 +422,4 @@ The intuition was right the alcohol content of the high-rated wines is greater t
 
 # References 
 1. https://en.wikipedia.org/wiki/White_wine
+2. http://www.r-bloggers.com/from-continuous-to-categorical/

@@ -461,6 +461,7 @@ I used the multivariate analysis to quantify more data from the bi-variate analy
 
 The most interesting interaction comes between the density, alcohol and residual sugar. With the decrease density the alcohol content increases but the residual sugar in the wines decrease. There is clear line of separation between them based on residual sugar. 
 
+The most important part that I found by the uni-variate, bi-variate and multi-variate analysis is that there is too much overlap between the features and nothing can be conclusively said about the wine quality from its chemical composition. 
 
 
 ### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
@@ -488,9 +489,26 @@ Yes, 11 linear models were created with adding features one by one. The highest 
 ### Plot One
 ```{r echo=FALSE, Plot_One}
 
+p1 <- qplot(data = data, x = residual.sugar, xlim = c(0,50)) + ylab("Number of observations") +
+  xlab("Residual Sugar") +
+  ggtitle("Histogram of Residual Sugar content in wine")
+
+p2 <- qplot(data=data, x = residual.sugar, binwidth = log10(1.05) , xlim=c(0,50))+
+  geom_vline(xintercept = mean(data$residual.sugar), color="red", show_guide=TRUE)+
+
+  ylab("Number of Observations")+
+  scale_x_log10("Residual Sugar (log10)")+
+  ggtitle("Histogram of Residual sugar content in wine") 
+
+grid.arrange(p1,p2,ncol=2)
 ```
 
 ### Description One
+This plot is the most interesting plot that I found. Both the plots show the histogram of residual sugar content in the wines data. But the plot on the left is on normal scale and that on right is on logarithmic scale. The first plot shows that the residual sugar data is left skewed and most of the values are less than 20 in decreasing order at every level. 
+The second plot shows the same data but on the logarithmic scale and this is where the hidden feature comes into the picture.  The second plot is bimodal. The *median value of the feature is shown in read line*. The bimodal plot starts sometime before the median and it roughly divides the two distributions in equal part. 
+
+This tells us that there is clear distinction in the wines data based on the residual sugar and it is explored more in the next plot. 
+
 
 
 ### Plot Two

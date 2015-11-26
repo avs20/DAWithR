@@ -12,6 +12,8 @@ by Ashutosh Singh
 # You should set echo=FALSE for all code chunks in your file.
 
 library(ggplot2)
+#install.packages("memisc")
+library(memisc)
 
 
 ###some useful functions 
@@ -140,9 +142,13 @@ The plot shows that mostly the sugar is determined by keeping it low or high.
 # Bivariate Plots Section
 ```{r echo=FALSE, Bivariate_Plots}
 library(GGally)
+library(corrplot)
 
 #ggpairs(data = data,columns=2:13)
 
+#plotting the correlation matrix
+cormat <- cor(data[2:12], data[2:12])
+corrplot(cormat, method="number")
 
 ```
 
@@ -348,13 +354,13 @@ Other than that the strongest relationship is a negative correlation between the
 Before starting the multivariate analysis I want to convert more features into categorical values. These are
 
 * alcohol its cut into 8 to 15 with an iterval of 1
-```{r}
+```{r echo=FALSE}
 
 data$alcohol.category<-cut(data$alcohol, seq(8,15,1), right=FALSE,labels=c(1:7))
 
 
 #There was overplotting in the default case so added the jitter.
-qplot(data=data,x=quality, y=alcohol.category, color=alcohol.category)+
+qplot(data=data,x=total.sulfur.dioxide, y=alcohol, color=quality.cat)+
 geom_point(position="jitter", alpha = 0.5, size=0.75)
 
 ```
@@ -364,8 +370,6 @@ geom_point(position="jitter", alpha = 0.5, size=0.75)
 Since the residual.sugar is bimodal on the log10 scale so I convert it into the orders of low and high based on its median.
 
 ```{r echo=FALSE}
-qplot(data=data,x=residual.sugar)+
-  scale_x_log10()
 
 summary(data$residual.sugar)
 #median is 5.200 so cut it into high and low with the median
@@ -374,20 +378,108 @@ summary(data$residual.sugar.cat)
 
 ```
 
-* density
+* quality
+
+quality is cut into 3 catgegories of **poor, average and good**
+
+```{r ehco=FALSE}
+as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
+
+data$quality.cat <- cut(as.numeric.factor(data$quality),breaks = c(0,4,6,10), labels=c("poor","average","good"))
+summary(data$quality.cat)
+
+```
+
+Since density and alcohol are co-related with the quality. lets take a look at them by quality
+
+```{r echo=FALSE}
+
+qplot(data = data, x = density, y = alcohol, color=quality.cat) + 
+  ggtitle("density and alcohol categorized by quality")
+
+```
+
+There are some points at the top left telling a better quality wine is with more alcohol and less density. 
 
 
 ```{r echo=FALSE, Multivariate_Plots}
 
+qplot(data =data, x= alcohol, y = density, color=residual.sugar.cat) +
+  stat_smooth(method = "lm")
 ```
+This plot shows the relationship between the density, alcohol and the residual sugar. Following relatiionships are evident 
+
+* for more alcohol we have less sugar content and also the density tends to be low
+* high density correlates to high sugar content. 
+* There is negative relationship between the the alcohol content and density of the wines
+
+```{r echo=FALSE}
+  
+qplot(data = data, y = density, x  = residual.sugar, color=quality.cat) +
+  geom_point(position="jitter")
+
+```
+This plot shows density and residual sugar with points colored buy the quality of wine. The plot is mostly green as there are more number of average wines but the purple color at the botom explains some of the variance in the quality with  lower density for same abount of residual sugar for good quality wines. 
+
+### Now making a predictive model
+
+In the first iteration I tool all the features in the model 
+
+```{r}
+
+
+
+data$quality.num <- as.numeric.factor(data$quality)
+m1 <- lm(quality.num ~ fixed.acidity , data=data)
+m2 <- update(m1, ~ . + volatile.acidity)
+m3 <- update(m2, ~ . + citric.acid)
+m4 <- update(m3, ~ . + residual.sugar)
+m5 <- update(m4, ~ . + chlorides)
+m6 <- update(m5, ~ . + free.sulfur.dioxide)
+m7 <- update(m6, ~ . + total.sulfur.dioxide)
+m8 <- update(m7, ~ . + density)
+m9 <- update(m8, ~ . + pH)
+m10 <- update(m9, ~ . + sulphates)
+m11 <- update(m10, ~ . + alcohol)
+
+mtable(m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11)
+
+```
+
+The R-square value goes to a maximum of 0.286, not so good. Also neither of the features intercept and p-value looks significant. More  can be explored in the model are as the features are added in sequence basis and not in a scientific manner. 
+The R-squared value may be increased by few percentage points but that will not take more than than the profit.
+
 
 # Multivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
 
+I used the multivariate analysis to quantify more data from the bi-variate analysis. Many plots are redone with taking quality as a colored factor. Relationships like as density increases the residual.sugar also increases. There is also a very strong correlation between the density and residual.sugar .
+
+
 ### Were there any interesting or surprising interactions between features?
 
+The most interesting interaction comes between the density, alcohol and residual sugar. With the decrease density the alcohol content increases but the residual sugar in the wines decrease. There is clear line of separation between them based on residual sugar. 
+
+
+
 ### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+
+Yes, 11 linear models were created with adding features one by one. The highest r-squared value came to be  **0.286** when all the features are incorporated. The variance explaination is not much and hence it cannot be said that we have a good model for prediction of wine quality. 
+
+#### Strengths:
+* The variance explaination of the model increased with every added feature and hence it can be said that each feature contributes in someway towards predicting the wine quality.
+
+* The model also explains which feature are more important than others like : alcohol, residual.sugar and density. 
+
+
+#### Limitations
+
+* The model doesn't explain much of the variance for the quality of wine. The r-squared value is just 0.286.
+
+* The reason for the above may be because we don't have enough data. Most of the data is of average quality and many features  overlap between the good quality and average quality hence a consensus cannot be found between the important features and their values. 
+
+* There is strong correlation between features such as free.sulfur.dioxide and the total.sulrfur dioxide ; density and residual.sugar. This also leads to multicollinearty. 
 
 ------
 

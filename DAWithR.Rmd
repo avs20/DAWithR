@@ -498,7 +498,8 @@ p2 <- qplot(data=data, x = residual.sugar, binwidth = log10(1.05) , xlim=c(0,50)
 
   ylab("Number of Observations")+
   scale_x_log10("Residual Sugar (log10)")+
-  ggtitle("Histogram of Residual sugar content in wine") 
+  ggtitle("Histogram of Residual sugar content in wine") +
+  scale_color_manual(values='red', labels = "median")
 
 grid.arrange(p1,p2,ncol=2)
 ```

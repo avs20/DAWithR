@@ -1,0 +1,11 @@
+# DAWithR
+Exploratory Data Analysis of White Wines  using Chemical composition
+
+This repository contains the EDA of White Wines using R for the Project 4 of the Udacity Nanodegree program. 
+
+The report can be read at https://cdn.rawgit.com/avs20/DAWithR/master/DAWithR.html
+
+The code to generate the html file is in **DAWithR.rmd**
+
+####Important : 
+#####The rmd file will not generate the plot matrix in the Bivariate analysis section. I have commented it as it takes 20-25 minutes on my machine to generate all the plots. To generate the plot remove the *#* at line 163

@@ -29,6 +29,8 @@ remove_outliers <- function(x, na.rm = TRUE, ...) {
   y
 }
 
+as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
+
 
 ```
 
@@ -299,6 +301,7 @@ ggplot(data=data,aes(x=clean.totol.sulfur.dioxide, residual.sugar))+
   geom_point(position="jitter", alpha=0.5, size=0.75)
 
 ```
+
 There are too many points on the lower side of the residual sugar even after removing the outliers but on the upper side it shows a linear relationship.
 
 Same relationships can also be found in between 
@@ -357,7 +360,7 @@ Before starting the multivariate analysis I want to convert more features into c
 ```{r echo=FALSE}
 
 data$alcohol.category<-cut(data$alcohol, seq(8,15,1), right=FALSE,labels=c(1:7))
-
+data$quality.cat <- cut(as.numeric.factor(data$quality),breaks = c(0,4,6,10), labels=c("poor","average","good"))
 
 #There was overplotting in the default case so added the jitter.
 qplot(data=data,x=total.sulfur.dioxide, y=alcohol, color=quality.cat)+
@@ -383,7 +386,6 @@ summary(data$residual.sugar.cat)
 quality is cut into 3 catgegories of **poor, average and good**
 
 ```{r ehco=FALSE}
-as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
 
 data$quality.cat <- cut(as.numeric.factor(data$quality),breaks = c(0,4,6,10), labels=c("poor","average","good"))
 summary(data$quality.cat)
@@ -499,7 +501,7 @@ p2 <- qplot(data=data, x = residual.sugar, binwidth = log10(1.05) , xlim=c(0,50)
   ylab("Number of Observations")+
   scale_x_log10("Residual Sugar (log10)")+
   ggtitle("Histogram of Residual sugar content in wine") +
-  scale_color_manual(values='red', labels = "median")
+  scale_colour_manual(values=c('red'='median', 'black'='none'))
 
 grid.arrange(p1,p2,ncol=2)
 ```
@@ -514,18 +516,40 @@ This tells us that there is clear distinction in the wines data based on the res
 
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
+qplot(data =data, x= alcohol, y = density, color=residual.sugar.cat) +
+  ggtitle("Distibution of density and alcohol classified by residual sugar.")+
+  xlab("Alcohol") +
+  ylab("Density") + 
+  scale_colour_discrete(name="Residul Sugar", labels=c("Low (<0.52)","High (>0.52)"))
 
 ```
 
 ### Description Two
 
+This plot shows the three-way relationship between density, alcohol and residual sugar. The idea of breaking the residual sugar into a factor comes from the first plot as it shows the bimodal relation ship. The median is chosen as the breakpoint.
+
+This plot shows the strong relationship between the density-alcohol and density-residual sugar.  The density decreases with the increase in alcohol level and high density leads to high level of sugar. The plot also build upon the hypothesis of previous plot that in the wines data there is clear distinction by the residual sugar level.
+
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
+rows <- is.na(data$density)
+sum(rows)
+data <- data[!rows,]
+
+cormat <- cor(data[2:12], data[2:12])
+corrplot(cormat, method="number")
 
 ```
 
 ### Description Three
+This plot/matrix is the correlation matrix between the different features of the wines data set. The closer to zero correlations are in white hence less visible than the correlations which are closer to extremes ( negatives in red and positives in blue) . Only taking a look at the matrix tells us about highly correlated features like 
+
+* density and sugar (0.83)
+* density and alcohol (-0.81)
+* alcohol and residual.sugar (0.46)
+
+This plot/matrix brings out the best of correlations and displays it in easier to read formats.
 
 ------
 

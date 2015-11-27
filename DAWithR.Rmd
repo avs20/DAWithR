@@ -582,7 +582,6 @@ The future work in this can be done with some more data about the good quality w
 
 In the end I started with zero knowledge of wines but now I know what components affects wine quality. The knowledge is not sufficient to be wine connoisseur but it's better than a blind guess. 
 
-A toast for completing this report.
 
 
 # References 

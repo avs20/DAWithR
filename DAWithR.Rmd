@@ -16,6 +16,7 @@
 #install.packages("memisc")
 
 
+
 #load libraries
 library(ggplot2)
 library(memisc)
@@ -46,7 +47,7 @@ as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
 
 Looking at the names and values of data
 
-```{r echo=FALSE, Load_the_Data}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
 # Load the Data
 data = read.csv('wineQualityWhites.csv')
 
@@ -70,7 +71,7 @@ data$quality <- as.factor(data$quality)
 Only the quality column which tells about the average quality of Wines can be used a  categorical column in first pass. Others look like continuous values. Let's see each of them one by one.
 
 # Univariate Plots Section
-```{r echo=FALSE, Univariate_Plots}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots}
 
 #Quality of Wines
 qplot(quality,data=data, geom="histogram")
@@ -79,7 +80,7 @@ summary(data$quality)
 ```
 Most the wines are of average quality. So we have few data points to delve into qualities. 
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 p1 <- qplot(fixed.acidity, data = data, geom="histogram")
 summary(data$fixed.acidity)
@@ -122,7 +123,7 @@ grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,ncol=3)
 ```
 
 The residual sugar histogram is skewed so plotting it in log transformation we get 
-```{r echo=FALSE,Residual_Sugar_transform} 
+```{r echo=FALSE, message=FALSE, warning=FALSE,Residual_Sugar_transform} 
 
 qplot(data = data, x = residual.sugar , geom="histogram")+
   scale_x_log10()
@@ -157,7 +158,7 @@ I investigated the residual sugar feature since the data looks skewed in the fir
 The plot shows that mostly the sugar is determined by keeping it low or high.
 
 # Bivariate Plots Section
-```{r echo=FALSE, Bivariate_Plots}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots}
 
 
 #ggpairs(data = data,columns=2:13)
@@ -180,7 +181,7 @@ Follwing strong correlations are found
 The scatter plot also shows many outliers here and there so I need to remove the outliers before further processing.
 
 
-```{r echo=FALSE, Remove_Outliers}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Remove_Outliers}
 
 #scttter plot of density with pH
 qplot(data = data, x = density, y = pH)+
@@ -196,7 +197,7 @@ qplot(data = data, x = density, y = pH)+
 
 From the above plot matrix a relationship between density and residual sugar looks linear. Plotting them again 
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 qplot(data = data , x = density, y = residual.sugar)+
   geom_point() 
@@ -207,7 +208,7 @@ qplot(data = data , x = density, y = residual.sugar)+
 
 Since our categorical value and also output is only quality. Lets take a look at how the values of different features spread with quality
 
-```{r echo=FALSE, Feature_Box_Plots}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Feature_Box_Plots}
 
 pf1 <- ggplot(data,aes(factor(quality),fixed.acidity))+geom_boxplot() +xlab("quality")
 pf2 <- ggplot(data,aes(factor(quality),volatile.acidity))+geom_boxplot()+xlab("quality")
@@ -235,7 +236,7 @@ I am still interested in residual sugar due to its bimodal histogram on the log 
 
 Looking into them in bigger values
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 data$clean.chlorides <- remove_outliers(data$chlorides)
 
@@ -255,7 +256,7 @@ We get a clear picture that high quality rated wines have less chlorides.But the
 
 Taking another look at density and quality
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 data$clean.density <- remove_outliers(data$density)
 
@@ -275,7 +276,7 @@ From the plot and the values we have less data for high quality rate wines : onl
 
 And now taking a look at the boxplot of alcohol and quality
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 data$clean.alcohol <- remove_outliers(data$alcohol)
 
@@ -291,7 +292,7 @@ The intuition was right the alcohol content of the high-rated wines is greater t
 
 There seems to be some relation between pH and fixed acidity from the plot matrix above
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 qplot(data=data,x = pH, y = fixed.acidity) + 
   ggtitle("pH and fixed.acidity")
@@ -299,7 +300,7 @@ qplot(data=data,x = pH, y = fixed.acidity) +
 
 Plotting with noise to remove the overplotting.
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(data = data,aes(x = pH, y = fixed.acidity))+
   geom_point(position="jitter", alpha=0.5, size=0.75)+
   ggtitle("pH and fixed.acidity with linear model") + stat_smooth(se=FALSE, method=lm,col="red")
@@ -308,7 +309,7 @@ ggplot(data = data,aes(x = pH, y = fixed.acidity))+
 
 It looks like a negative correlation between pH and **fixed.acidity** . The above plot also shows a linear regression line. 
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 data$clean.totol.sulfur.dioxide <- remove_outliers(data$total.sulfur.dioxide)
 
@@ -326,7 +327,7 @@ Same relationships can also be found in between
 
 Plots are below
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 qplot(data=data, x = alcohol, y = residual.sugar)+
   geom_point(position="jitter", alpha=0.5, size=0.75)+
@@ -373,7 +374,7 @@ Other than that the strongest relationship is a negative correlation between the
 Before starting the multivariate analysis I want to convert more features into categorical values. These are
 
 * **Alcohol** It is cut into 7 factors from 8 to 15 with an iterval of 1
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 data$alcohol.category<-cut(data$alcohol, seq(8,15,1), right=FALSE,labels=c(1:7))
 data$quality.cat <- cut(as.numeric.factor(data$quality),breaks = c(0,4,6,10), labels=c("poor","average","good"))
@@ -386,7 +387,7 @@ summary(data$alcohol.category)
 
 Since the residual.sugar is bimodal on the log10 scale so I convert it into the orders of low and high based on its median.
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 summary(data$residual.sugar)
 #median is 5.200 so cut it into high and low with the median
@@ -407,7 +408,7 @@ summary(data$quality.cat)
 
 Since density and alcohol are co-related with the quality. lets take a look at them by quality
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 qplot(data = data, x = density, y = alcohol, color=quality.cat) + 
   ggtitle("density and alcohol categorized by quality")
@@ -417,7 +418,7 @@ qplot(data = data, x = density, y = alcohol, color=quality.cat) +
 There are some points at the top left telling a better quality wine is with more alcohol and less density. 
 
 
-```{r echo=FALSE, Multivariate_Plots}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots}
 
 qplot(data =data, x= alcohol, y = density, color=residual.sugar.cat) +
   stat_smooth(method = "lm")
@@ -429,7 +430,7 @@ This plot shows the relationship between the density, alcohol and the residual s
 * high density correlates to high sugar content. 
 * There is negative relationship between the the alcohol content and density of the wines
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
   
 qplot(data = data, y = density, x  = residual.sugar, color=quality.cat) +
   geom_point(position="jitter")
@@ -504,7 +505,7 @@ Yes, 11 linear models were created with adding features one by one. The highest 
 # Final Plots and Summary
 
 ### Plot One
-```{r echo=FALSE, Plot_One}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_One}
 
 p1 <- qplot(data = data, x = residual.sugar, xlim = c(0,50)) + ylab("Number of observations") +
   xlab("Residual Sugar") +
@@ -533,7 +534,7 @@ This tells us that there is clear distinction in the wines data based on the res
 
 
 ### Plot Two
-```{r echo=FALSE, Plot_Two}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Two}
 qplot(data =data, x= alcohol, y = density, color=residual.sugar.cat) +
   ggtitle("Distibution of density and alcohol classified by residual sugar.")+
   xlab("Alcohol") +
@@ -550,7 +551,7 @@ This plot shows the strong relationship between the density-alcohol and density-
 
 
 ### Plot Three
-```{r echo=FALSE, Plot_Three}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Three}
 rows <- is.na(data$density)
 data <- data[!rows,]
 

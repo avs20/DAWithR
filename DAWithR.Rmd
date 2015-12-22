@@ -68,7 +68,9 @@ str(data)
 data$quality <- as.factor(data$quality)
 
 ```
-Only the quality column which tells about the average quality of Wines can be used a  categorical column in first pass. Others look like continuous values. Let's see each of them one by one.
+Only the quality column which tells about the average quality of Wines can be 
+used a  categorical column in first pass. Others look like continuous values.
+Let's see each of them one by one.
 
 # Univariate Plots Section
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots}
@@ -78,7 +80,8 @@ qplot(quality,data=data, geom="histogram")
 
 summary(data$quality)
 ```
-Most the wines are of average quality. So we have few data points to delve into qualities. 
+Most the wines are of average quality. So we have few data points to delve into
+qualities. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -122,7 +125,8 @@ grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,ncol=3)
 
 ```
 
-The residual sugar histogram is skewed so plotting it in log transformation we get 
+The residual sugar histogram is skewed so plotting it in log transformation we
+get 
 ```{r echo=FALSE, message=FALSE, warning=FALSE,Residual_Sugar_transform} 
 
 qplot(data = data, x = residual.sugar , geom="histogram")+
@@ -130,31 +134,44 @@ qplot(data = data, x = residual.sugar , geom="histogram")+
 
 ```
 
-There exists a bimodal distribution. Residual sugar is what is left when the fragmentation stops. 
-
+There exists a bimodal distribution. Residual sugar is what is left when the 
+fragmentation stops. 
 
 
 # Univariate Analysis
 
 ### What is the structure of your dataset?
-The data contains 4898 observations of white wine and their physiochemical analysis as features. A total of 11 features are used and the quality variable is used as output which also serves as a categorical variable.
+The data contains 4898 observations of white wine and their physiochemical 
+analysis as features. A total of 11 features are used and the quality variable 
+is used as output which also serves as a categorical variable.
 
-All features except quality are continuous.The quality feature domain is from 0 to 10 but the range is available from 3 to 9. The quality of wine is subjective so  average was used to depict quality by atleast 3 observers.
+All features except quality are continuous.The quality feature domain is from 
+0 to 10 but the range is available from 3 to 9. The quality of wine is 
+subjective so  average was used to depict quality by atleast 3 observers.
 
 ### What is/are the main feature(s) of interest in your dataset?
-The quality feature rises to the top . Also since I have never tasted wine and as an engineer I thought of predicting the quality of wine by its features. 
-Residual sugar also seems interesting as this what makes wines taste sweeter. Also content of residual sugar is maintained and the sulphides are  added to preserve the sugar content from further fermentation. 
+The quality feature rises to the top . Also since I have never tasted wine and 
+as an engineer I thought of predicting the quality of wine by its features. 
+Residual sugar also seems interesting as this what makes wines taste sweeter.
+Also content of residual sugar is maintained and the sulphides are  added to
+preserve the sugar content from further fermentation. 
 
 Last I think most important is alcohol for obvious reasons. 
 
-### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+### What other features in the dataset do you think will help support your
+investigation into your feature(s) of interest?
 
-I think pH value and density features should be explored more in association with the quality of wines
+I think pH value and density features should be explored more in association 
+with the quality of wines
 
 ### Did you create any new variables from existing variables in the dataset?
 
-### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
-I investigated the residual sugar feature since the data looks skewed in the first pass. I applied the log transformation on it which clearly shows a bimodal relationship between the wines and the sugar after fermentation. 
+### Of the features you investigated, were there any unusual distributions?
+Did you perform any operations on the data to tidy, adjust, or change the form
+of the data? If so, why did you do this?
+I investigated the residual sugar feature since the data looks skewed in the
+first pass. I applied the log transformation on it which clearly shows a bimodal
+relationship between the wines and the sugar after fermentation. 
 The plot shows that mostly the sugar is determined by keeping it low or high.
 
 # Bivariate Plots Section
@@ -165,10 +182,13 @@ The plot shows that mostly the sugar is determined by keeping it low or high.
 
 #plotting the correlation matrix
 #cormat <- cor(data[2:12], data[2:12])
-ggcorr(data[, 2:12], geom="blank", label=TRUE, label_size=3,label_round=2,hjust=0.7,color = "grey50",layout.exp = 3)
+ggcorr(data[, 2:12], geom="blank", label=TRUE, label_size=3,label_round=2,
+      hjust=0.7,color = "grey50",layout.exp = 3)
+
 ```
 
-For a quick overview of the data I plotted a scatterplot matrix of the variables to look at the correlation and the distribution with other variables. 
+For a quick overview of the data I plotted a scatterplot matrix of the variables
+to look at the correlation and the distribution with other variables. 
 
 Follwing strong correlations are found 
 
@@ -177,24 +197,30 @@ Follwing strong correlations are found
  - fixed acidity and pH (0.426)
  - residual sugar and density (0.839)
 
-The scatter plot also shows many outliers here and there so I need to remove the outliers before further processing.
+The scatter plot also shows many outliers here and there so I need to remove the
+outliers before further processing.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Remove_Outliers}
 
 #scttter plot of density with pH
-qplot(data = data, x = density, y = pH)+
-  geom_point()
+ggplot(data = data, aes(x = density, y = pH))+
+  geom_point(alpha=1/4)+
+  stat_smooth(method="lm", col="red") +
+  ggtitle("density and pH  with outliers")
 
 #density shows some outliers so first remove it
 data$density <- remove_outliers(data$density)
 
-qplot(data = data, x = density, y = pH)+
-  geom_point()
+ggplot(data = data, aes(x = density, y = pH))+
+  geom_point(alpha =1/4)+
+  stat_smooth(method="lm", col="red")+
+  ggtitle("density and pH with outliers removed")
 
 ```
 
-From the above plot matrix a relationship between density and residual sugar looks linear. Plotting them again 
+From the above plot matrix a relationship between density and residual sugar 
+looks linear. Plotting them again 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -205,13 +231,36 @@ qplot(data = data , x = density, y = residual.sugar)+
 
 ```
 
-Since our categorical value and also output is only quality. Lets take a look at how the values of different features spread with quality
+Since our categorical value and also output is only quality. Lets take a look 
+at how the values of different features spread with quality
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Feature_Box_Plots}
 
-pf1 <- ggplot(data,aes(factor(quality),fixed.acidity))+geom_boxplot() +xlab("quality")
-pf2 <- ggplot(data,aes(factor(quality),volatile.acidity))+geom_boxplot()+xlab("quality")
-pf3 <- ggplot(data,aes(factor(quality),citric.acid))+geom_boxplot()+xlab("quality")
+ggplot(data,aes(factor(quality),fixed.acidity))+geom_boxplot() +xlab("quality") +ylab("fixed acidity")
+```
+
+The y axis spread is too much due to the outliers but we get the idea. Fixed
+acidity does is not discrminative enough to change according to quality. Similar
+will be the case for volatile acidity as fixed acidity and volatile acidity are
+linearly correlated. We also see the same trend for Citric Acid
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Quality_Acidity_Comparison}
+ggplot(data,aes(factor(quality),volatile.acidity)) + geom_boxplot() +
+  xlab("quality") + ylab("volatile acidity") +
+  ggtitle("Volatile Acidity and Quality")
+
+
+ggplot(data,aes(factor(quality),citric.acid)) + geom_boxplot() +
+  xlab("quality") + ylab("Citric Acid") +
+  ggtitle("Citric acid and Quality")
+
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
 pf4 <- ggplot(data,aes(factor(quality),residual.sugar))+geom_boxplot()+xlab("quality")
 pf5 <- ggplot(data,aes(factor(quality),chlorides))+geom_boxplot()+xlab("quality")
 pf6 <- ggplot(data,aes(factor(quality),free.sulfur.dioxide))+geom_boxplot()+xlab("quality")
@@ -221,17 +270,20 @@ pf9 <- ggplot(data,aes(factor(quality),pH))+geom_boxplot()+xlab("quality")
 pf10 <- ggplot(data,aes(factor(quality),sulphates))+geom_boxplot()+xlab("quality")
 pf11 <- ggplot(data,aes(factor(quality),alcohol))+geom_boxplot()+xlab("quality")
 
-grid.arrange(pf1,pf2,pf3,pf4,pf5,pf6,pf7,pf8,pf9,pf10,pf11,ncol=3)
+#grid.arrange(pf1,pf2,pf3,pf4,pf5,pf6,pf7,pf8,pf9,pf10,pf11,ncol=3)
 
 ```
 
-These box plots give us an average idea of what features change according to quality. Some specific mentions are
+These box plots give us an average idea of what features change according to 
+quality. Some specific mentions are
 
 * chlorides have low quantity with high quality
 * density is also low for high quality wines
 * alcohol is high for high quality wines
 
-I am still interested in residual sugar due to its bimodal histogram on the log axis.So instead of quality lets look at the scatter plots of residual sugar with other features.
+I am still interested in residual sugar due to its bimodal histogram on the 
+log axis.So instead of quality lets look at the scatter plots of residual sugar
+with other features.
 
 Looking into them in bigger values
 
@@ -241,17 +293,21 @@ data$clean.chlorides <- remove_outliers(data$chlorides)
 
 p1<-qplot(data = data, x = factor(quality), y = clean.chlorides)+
   geom_boxplot() + xlab("quality") +
-  stat_summary(fun.y=mean, color="red", hape=18,geom="point", size=3,show_guide = TRUE)
+  stat_summary(fun.y=mean, color="red", hape=18,geom="point", size=3,
+              show_guide = TRUE)
 
 p2 <- qplot(data=data, x = factor(quality), y = chlorides)+ geom_boxplot()
 
 grid.arrange(p2,p1, ncol=2)
 
-ggplot(data= data,aes(clean.chlorides,color=quality,fill=quality,group=quality)) + geom_density()
+ggplot(data= data,aes(clean.chlorides,color=quality,fill=quality,group=quality))
+      + geom_density()
 
 ```
 
-We get a clear picture that high quality rated wines have less chlorides.But the correlation is not straight. Low quality rated wines (quality 3) also have less chlorides than the average. There may be other factors. 
+We get a clear picture that high quality rated wines have less chlorides.But 
+the correlation is not straight. Low quality rated wines (quality 3) also have
+less chlorides than the average. There may be other factors. 
 
 Taking another look at density and quality
 
@@ -270,7 +326,9 @@ ggplot(data= data,aes(clean.density,color=quality,fill=quality,group=quality)) +
 
 ```
 
-From the plot and the values we have less data for high quality rate wines : only 1060 but it is evident that high-rated wines have less density than the low rated wines. 
+From the plot and the values we have less data for high quality rate wines :
+only 1060 but it is evident that high-rated wines have less density than the
+low rated wines. 
 
 
 And now taking a look at the boxplot of alcohol and quality
@@ -287,9 +345,11 @@ ggplot(data= data,aes(clean.alcohol,color=quality,fill=quality,group=quality)) +
 
 ```
 
-The intuition was right the alcohol content of the high-rated wines is greater than in low-rated wines.
+The intuition was right the alcohol content of the high-rated wines is greater
+than in low-rated wines.
 
-There seems to be some relation between pH and fixed acidity from the plot matrix above
+There seems to be some relation between pH and fixed acidity from the plot
+matrix above
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -302,22 +362,26 @@ Plotting with noise to remove the overplotting.
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(data = data,aes(x = pH, y = fixed.acidity))+
   geom_point(position="jitter", alpha=0.5, size=0.75)+
-  ggtitle("pH and fixed.acidity with linear model") + stat_smooth(se=FALSE, method=lm,col="red")
+  ggtitle("pH and fixed.acidity with linear model") +
+  stat_smooth(se=FALSE, method=lm,col="red")
 
 ```
 
-It looks like a negative correlation between pH and **fixed.acidity** . The above plot also shows a linear regression line. 
+It looks like a negative correlation between pH and **fixed.acidity** .
+The above plot also shows a linear regression line. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 data$clean.totol.sulfur.dioxide <- remove_outliers(data$total.sulfur.dioxide)
 
 ggplot(data=data,aes(x=clean.totol.sulfur.dioxide, residual.sugar))+
-  geom_point(position="jitter", alpha=0.5, size=0.75) + xlab("clean total sulfur dioxide")
+  geom_point(position="jitter", alpha=0.5, size=0.75) +
+  xlab("clean total sulfur dioxide")
 
 ```
 
-There are too many points on the lower side of the residual sugar even after removing the outliers but on the upper side it shows a linear relationship.
+There are too many points on the lower side of the residual sugar even after
+removing the outliers but on the upper side it shows a linear relationship.
 
 Same relationships can also be found in between 
 
@@ -343,8 +407,11 @@ qplot(data=data, x = alcohol, y = clean.totol.sulfur.dioxide)+
 
 # Bivariate Analysis
 
-### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
-Based on the correlation coefficients between the various pairs the most strong relation ship is found beween the following pairs
+### Talk about some of the relationships you observed in this part of the 
+investigation. How did the feature(s) of interest vary with other features 
+in the dataset?
+Based on the correlation coefficients between the various pairs the most strong
+relationship is found beween the following pairs
 
 Sr No.    Feature1                  Feature2             Correlation
 ------    --------                  ---------            -----------
@@ -354,25 +421,39 @@ Sr No.    Feature1                  Feature2             Correlation
 4.        achohol                   total.sulfur.dioxide  -0.4488
 
 
-I have not taken the quality in calculating the correlation as I just wanted to know the correlation between the features themselves.
+I have not taken the quality in calculating the correlation as I just wanted
+to know the correlation between the features themselves.
 
-### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+### Did you observe any interesting relationships between the other features
+(not the main feature(s) of interest)?
 
-Yes, as shown in the plots and the table above, I found some relationships which were not evident directly. Plotting variables helped to look into these in more detail. 
+Yes, as shown in the plots and the table above, I found some relationships
+which were not evident directly. Plotting variables helped to look into these 
+in more detail. 
 
-The relationship between the pH value and the fixed.acidity is trivial as pH value is a representation of the acidity. But the relationship between the  total sulfurdioxide and the residual sugar , alcohol and residual sugar may help us in explaining the variance which will be explored in the next section.  
+The relationship between the pH value and the fixed.acidity is trivial as pH 
+value is a representation of the acidity. But the relationship between the  
+total sulfurdioxide and the residual sugar , alcohol and residual sugar may 
+help us in explaining the variance which will be explored in the next section.  
 
 
 ### What was the strongest relationship you found?
-The strongest relationship found was between the free sulfur dioxide and the total sulfur dioxide. This is trivial as both are interdependent. Also their correlation doesn't matter because we one is a part of other and hence they will also lead to multi collinearity problems if we use both of them in a linear model. 
+The strongest relationship found was between the free sulfur dioxide and the
+total sulfur dioxide. This is trivial as both are interdependent. Also their 
+correlation doesn't matter because we one is a part of other and hence they
+will also lead to multi collinearity problems if we use both of them in a
+linear model. 
 
-Other than that the strongest relationship is a negative correlation between the density and residual sugar.
+Other than that the strongest relationship is a negative correlation between
+the density and residual sugar.
 
 # Multivariate Plots Section
 
-Before starting the multivariate analysis I want to convert more features into categorical values. These are
+Before starting the multivariate analysis I want to convert more features into 
+categorical values. These are
 
-* **Alcohol** It is cut into 7 factors from 8 to 15 with an iterval of 1
+* **Alcohol** It is cut into 7 factors from 8 to 15 with an interval of 1
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 data$alcohol.category<-cut(data$alcohol, seq(8,15,1), right=FALSE,labels=c(1:7))
@@ -384,7 +465,8 @@ summary(data$alcohol.category)
 
 * residual.sugar
 
-Since the residual.sugar is bimodal on the log10 scale so I convert it into the orders of low and high based on its median.
+Since the residual.sugar is bimodal on the log10 scale so I convert it into 
+the orders of low and high based on its median.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -405,7 +487,8 @@ summary(data$quality.cat)
 
 ```
 
-Since density and alcohol are co-related with the quality. lets take a look at them by quality
+Since density and alcohol are co-related with the quality. lets take a look 
+at them by quality
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -414,7 +497,8 @@ qplot(data = data, x = density, y = alcohol, color=quality.cat) +
 
 ```
 
-There are some points at the top left telling a better quality wine is with more alcohol and less density. 
+There are some points at the top left telling a better quality wine is with
+more alcohol and less density. 
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots}
@@ -423,20 +507,25 @@ qplot(data =data, x= alcohol, y = density, color=residual.sugar.cat) +
   stat_smooth(method = "lm")
 ```
 
-This plot shows the relationship between the density, alcohol and the residual sugar. Following relatiionships are evident 
+This plot shows the relationship between the density, alcohol and the residual 
+sugar. Following relatiionships are evident 
 
 * for more alcohol we have less sugar content and also the density tends to be low
 * high density correlates to high sugar content. 
-* There is negative relationship between the the alcohol content and density of the wines
+* There is negative relationship between the the alcohol content and density 
+of the wines
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
   
-qplot(data = data, y = density, x  = residual.sugar, color=quality.cat) +
-  geom_point(position="jitter")
+ggplot(data = data, aes(y = density, x= residual.sugar, color=quality.cat) ) +
+  geom_point(position="jitter", alpha=1/4)
 
 ```
 
-This plot shows density and residual sugar with points colored buy the quality of wine. The plot is mostly green as there are more number of average wines but the purple color at the botom explains some of the variance in the quality with  lower density for same abount of residual sugar for good quality wines. 
+This plot shows density and residual sugar with points colored buy the quality
+of wine. The plot is mostly green as there are more number of average wines but
+the purple color at the botom explains some of the variance in the quality with
+lower density for same abount of residual sugar for good quality wines. 
 
 ### Now making a predictive model
 
@@ -463,41 +552,68 @@ mtable(m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11)
 
 ```
 
-The R-square value goes to a maximum of 0.286, not so good. Also neither of the features intercept and p-value looks significant. More  can be explored in the model are as the features are added in sequence basis and not in a calculated  manner. 
-The R-squared value may be increased by few percentage points but that will not take more work that the accuracy gained.
+The R-square value goes to a maximum of 0.286, not so good. Also neither of 
+the features intercept and p-value looks significant. More  can be explored 
+in the model are as the features are added in sequence basis and not in a 
+calculated  manner. 
+The R-squared value may be increased by few percentage points but that will
+not take more work that the accuracy gained.
 
 
 # Multivariate Analysis
 
-### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+### Talk about some of the relationships you observed in this part of the
+investigation. Were there features that strengthened each other in terms of
+looking at your feature(s) of interest?
 
-I used the multivariate analysis to quantify more data from the bi-variate analysis. The plots are redone with taking some feature as a colored factor. Relationships like as density increases the residual.sugar also increases. There is also a very strong correlation between the density and residual.sugar .
+I used the multivariate analysis to quantify more data from the bi-variate
+analysis. The plots are redone with taking some feature as a colored factor.
+Relationships like as density increases the residual.sugar also increases.
+There is also a very strong correlation between the density and residual.sugar .
 
 
 ### Were there any interesting or surprising interactions between features?
 
-The most interesting interaction comes between the density, alcohol and residual sugar. With the decrease density the alcohol content increases but the residual sugar in the wines decrease. There is clear line of separation between them based on residual sugar. 
+The most interesting interaction comes between the density, alcohol and 
+residual sugar. With the decrease density the alcohol content increases but
+the residual sugar in the wines decrease. There is clear line of separation 
+between them based on residual sugar. 
 
-The most important part that I found by the uni-variate, bi-variate and multi-variate analysis is that there is too much overlap between the features and nothing can be conclusively said about the wine quality from its chemical composition. 
+The most important part that I found by the uni-variate, bi-variate and 
+multi-variate analysis is that there is too much overlap between the features
+and nothing can be conclusively said about the wine quality from its chemical
+composition. 
 
 
 ### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
 
-Yes, 11 linear models were created with adding features one by one. The highest r-squared value came to be  **0.286** when all the features are incorporated. The variance explaination is not much and hence it cannot be said that we have a good model for prediction of wine quality. 
+Yes, 11 linear models were created with adding features one by one. 
+The highest r-squared value came to be  **0.286** when all the features are 
+incorporated. The variance explaination is not much and hence it cannot be 
+said that we have a good model for prediction of wine quality. 
 
 #### Strengths:
-* The variance explaination of the model increased with every added feature and hence it can be said that each feature contributes in someway towards predicting the wine quality.
+* The variance explaination of the model increased with every added feature
+and hence it can be said that each feature contributes in someway towards 
+predicting the wine quality.
 
-* The model also explains which feature are more important than others like : alcohol, residual.sugar and density. 
+* The model also explains which feature are more important than others 
+like : alcohol, residual.sugar and density. 
 
 
 #### Limitations
 
-* The model doesn't explain much of the variance for the quality of wine. The r-squared value is just 0.286.
+* The model doesn't explain much of the variance for the quality of wine. 
+The r-squared value is just 0.286.
 
-* The reason for the above may be because we don't have enough data. Most of the data is of average quality and many features  overlap between the good quality and average quality hence a consensus cannot be found between the important features and their values. 
+* The reason for the above may be because we don't have enough data.
+Most of the data is of average quality and many features  overlap between
+the good quality and average quality hence a consensus cannot be found
+between the important features and their values. 
 
-* There is strong correlation between features such as free.sulfur.dioxide and the total.sulrfur dioxide ; density and residual.sugar. This also leads to problem of multicollinearty. 
+* There is strong correlation between features such as free.sulfur.dioxide and
+the total.sulrfur dioxide ; density and residual.sugar. This also leads to
+problem of multicollinearty. 
 
 ------
 
@@ -506,7 +622,8 @@ Yes, 11 linear models were created with adding features one by one. The highest 
 ### Plot One
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_One}
 
-p1 <- qplot(data = data, x = residual.sugar, xlim = c(0,50)) + ylab("Number of observations") +
+p1 <- qplot(data = data, x = residual.sugar, xlim = c(0,50)) +
+  ylab("Number of observations") +
   xlab("Residual Sugar") +
   ggtitle("Histogram of Residual Sugar content in wine")+
   theme(text = element_text(size=14))
@@ -525,10 +642,19 @@ grid.arrange(p1,p2,ncol=2)
 ```
 
 ### Description One
-This plot is the most interesting plot that I found. Both the plots show the histogram of residual sugar content in the wines data. But the plot on the left is on normal scale and that on right is on logarithmic scale. The first plot shows that the residual sugar data is left skewed and most of the values are less than 20 in decreasing order at every level. 
-The second plot shows the same data but on the logarithmic scale and this is where the hidden feature comes into the picture.  The second plot is bimodal. The *median value of the feature is shown in red line*. The bimodal plot starts sometime before the median and it roughly divides the two distributions in equal part. 
+This plot is the most interesting plot that I found. Both the plots show the
+histogram of residual sugar content in the wines data. But the plot on the 
+left is on normal scale and that on right is on logarithmic scale. The first
+plot shows that the residual sugar data is left skewed and most of the values
+are less than 20 in decreasing order at every level. 
+The second plot shows the same data but on the logarithmic scale and this is
+where the hidden feature comes into the picture.  The second plot is bimodal.
+The *median value of the feature is shown in red line*. The bimodal plot starts 
+sometime before the median and it roughly divides the two distributions in equal
+part. 
 
-This tells us that there is clear distinction in the wines data based on the residual sugar and it is explored more in the next plot. 
+This tells us that there is clear distinction in the wines data based on the
+residual sugar and it is explored more in the next plot. 
 
 
 
@@ -538,15 +664,23 @@ qplot(data =data, x= alcohol, y = density, color=residual.sugar.cat) +
   ggtitle("Distibution of density and alcohol classified by residual sugar.")+
   xlab("Alcohol") +
   ylab("Density") + 
-  scale_colour_discrete(name="Residul Sugar", labels=c("Low (<0.52)","High (>0.52)"))
+  scale_colour_discrete(name="Residul Sugar",
+                        labels=c("Low (<0.52)","High (>0.52)"))
 
 ```
 
 ### Description Two
 
-This plot shows the three-way relationship between density, alcohol and residual sugar. The idea of breaking the residual sugar into a factor comes from the first plot as it shows the bimodal relation ship. The median is chosen as the breakpoint.
+This plot shows the three-way relationship between density, alcohol and 
+residual sugar. The idea of breaking the residual sugar into a factor comes 
+from the first plot as it shows the bimodal relation ship. The median is
+chosen as the breakpoint.
 
-This plot shows the strong relationship between the density-alcohol and density-residual sugar.  The density decreases with the increase in alcohol level and high density leads to high level of sugar. The plot also build upon the hypothesis of previous plot that in the wines data there is clear distinction by the residual sugar level.
+This plot shows the strong relationship between the density-alcohol and
+density-residual sugar.  The density decreases with the increase in alcohol
+level and high density leads to high level of sugar. The plot also build upon
+the hypothesis of previous plot that in the wines data there is clear 
+distinction by the residual sugar level.
 
 
 ### Plot Three
@@ -564,23 +698,42 @@ corrplot(cormat,method="number",type="lower", diag=FALSE ,title="Correlation of 
 ```
 
 ### Description Three
-This plot/matrix is the correlation matrix between the different features of the wines data set. The closer to zero correlations are in white hence less visible than the correlations which are closer to extremes ( negatives in red and positives in blue) . Only taking a look at the matrix tells us about highly correlated features like 
+This plot/matrix is the correlation matrix between the different features of 
+the wines data set. The closer to zero correlations are in white hence less 
+visible than the correlations which are closer to extremes ( negatives in red
+and positives in blue) . Only taking a look at the matrix tells us about highly
+correlated features like 
 
 * density and sugar (0.83)
 * density and alcohol (-0.81)
 * alcohol and residual.sugar (0.46)
 
-This plot/matrix brings out the best of correlations and displays it in easier to read formats.
+This plot/matrix brings out the best of correlations and displays it in easier
+to read formats.
 
 ------
 
 # Reflection
 
-This was an intense project compared previous. The data was just thrown and I needed to find the patterns. I chose the White Wines dataset as I didn't had enough time to dig into other datasets and this was also a tidy one so I thought it will be easier. I started with exploring through the features and and then finding relationship between them to making a model to predict the wine quality. Some features are correlated strongly and many are not. The prediction model doesn't do well as the features are variable throughout the quality level. There is also a strong bias towards the average quality wines as the data for the high and poor quality is considerably less.
+This was an intense project compared previous. The data was just thrown and I
+needed to find the patterns. I chose the White Wines dataset as I didn't had 
+enough time to dig into other datasets and this was also a tidy one so I thought
+it will be easier. I started with exploring through the features and and then 
+finding relationship between them to making a model to predict the wine quality.
+Some features are correlated strongly and many are not. The prediction model
+doesn't do well as the features are variable throughout the quality level.
+There is also a strong bias towards the average quality wines as the data for 
+the high and poor quality is considerably less.
 
-The future work in this can be done with some more data about the good quality wines. Using a better and calculated approach to feature selection can improve the model with less features also. Also I haven't used the dplyr, etc. packages which can be used to make more intricate analysis.
+The future work in this can be done with some more data about the good quality 
+wines. Using a better and calculated approach to feature selection can improve
+the model with less features also. Also I haven't used the dplyr, etc. packages 
+which can be used to make more intricate analysis.
 
-In the end I started with zero knowledge of wines but now I know what components affects wine quality. The knowledge is not sufficient to be wine connoisseur but it's better than a blind guess. 
+In the end I started with zero knowledge of wines but now I know what components
+affects wine 
+quality. The knowledge is not sufficient to be wine connoisseur but it's better
+than a blind guess. 
 
 
 

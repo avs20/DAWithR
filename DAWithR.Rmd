@@ -257,51 +257,116 @@ ggplot(data,aes(factor(quality),citric.acid)) + geom_boxplot() +
 
 ```
 
+Looking at the relationship between residual sugar and qaulity
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Residual_Quality}
 
-
-pf4 <- ggplot(data,aes(factor(quality),residual.sugar))+geom_boxplot()+xlab("quality")
-pf5 <- ggplot(data,aes(factor(quality),chlorides))+geom_boxplot()+xlab("quality")
-pf6 <- ggplot(data,aes(factor(quality),free.sulfur.dioxide))+geom_boxplot()+xlab("quality")
-pf7 <- ggplot(data,aes(factor(quality),total.sulfur.dioxide))+geom_boxplot()+xlab("quality")
-pf8 <- ggplot(data,aes(factor(quality),density))+geom_boxplot()+xlab("quality")
-pf9 <- ggplot(data,aes(factor(quality),pH))+geom_boxplot()+xlab("quality")
-pf10 <- ggplot(data,aes(factor(quality),sulphates))+geom_boxplot()+xlab("quality")
-pf11 <- ggplot(data,aes(factor(quality),alcohol))+geom_boxplot()+xlab("quality")
-
-#grid.arrange(pf1,pf2,pf3,pf4,pf5,pf6,pf7,pf8,pf9,pf10,pf11,ncol=3)
+ggplot(data,aes(x=quality, y= remove_outliers(residual.sugar)))+
+  geom_boxplot()+
+  ylab("Residual Sugar")+
+  ggtitle("Residual sugar and quality")
 
 ```
 
-These box plots give us an average idea of what features change according to 
-quality. Some specific mentions are
+It looks like low residual sugar and wine quality are correlated but we also 
+get almose same values of residual sugar for wines rated poor. It is inconclusive
+to use residual sugar for discriminating wines.The median value is low than others
+
+Moving on to quality and chlorides
+```{r echo=FALSE, message=FALSE, warning=FALSE, Chlorides_and_Quality}
+
+pcl1 <- ggplot(data,aes(x=quality, y= chlorides))+
+  geom_boxplot()+
+  ylab("Chloride")+
+  ggtitle("Chlorides and quality")
+
+pcl2 <- ggplot(data,aes(x=quality, y= remove_outliers(chlorides)))+
+  geom_boxplot()+
+  ylab("Chlorides (no outliers)")+
+  ggtitle("Chlorides and quality")
+
+grid.arrange(pcl1,pcl2,ncol=2)
+
+```
+
+I have removed the outliers from the chlorides data as they were skewing the
+plot and we may be missing the big picture.From the box plot it is clear that 
+high quality wines have low chlorides. We will explore this aspect in detail
+later on.
+
+The next feature is Free sulfur dioxide. Since *free sulfur dioxide* and
+*total sulfur dioxide* are correlated with almost linear relationship,looking
+at them show similar plots
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Sulfur_and_quality}
+
+ps1 <- ggplot(data,aes(x=quality, y=free.sulfur.dioxide)) +
+  geom_boxplot()
+
+ps2 <- ggplot(data,aes(x=quality, y=total.sulfur.dioxide)) +
+  geom_boxplot()
+
+grid.arrange(ps1,ps2,ncol=2)
+
+```
+
+The plot looks almost same except for scale which is obvious and there is also 
+strong correlation between them.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(data,aes(x=total.sulfur.dioxide, y = free.sulfur.dioxide))+
+  geom_point(alpha=1/10, position="jitter")+
+  stat_smooth(method = "lm")
+
+```
+
+
+Now looking at quality with pH, there is a meek indication of high pH as 
+compared to othes for high quality wines.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+  ggplot(data,aes(x=quality, y=pH))+
+    geom_boxplot()+
+    ggtitle("pH and Quality")
+
+```
+
+But no such patter emerges when we compare sulphates with the quality.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+  ggplot(data,aes(x=quality, y=sulphates))+
+    geom_boxplot() +
+    ggtitle("Sulphates and Quality ")
+  
+
+```
+
+
+
+These box plots above give us an average idea of what features change according
+to quality. Some specific mentions are
 
 * chlorides have low quantity with high quality
 * density is also low for high quality wines
 * alcohol is high for high quality wines
 
-I am still interested in residual sugar due to its bimodal histogram on the 
-log axis.So instead of quality lets look at the scatter plots of residual sugar
-with other features.
+These comparisons give us an eye view of how individual features impact the
+quality of the wines. Now lets take an overview of how these features
+affect each other.
 
-Looking into them in bigger values
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 data$clean.chlorides <- remove_outliers(data$chlorides)
 
-p1<-qplot(data = data, x = factor(quality), y = clean.chlorides)+
-  geom_boxplot() + xlab("quality") +
-  stat_summary(fun.y=mean, color="red", hape=18,geom="point", size=3,
-              show_guide = TRUE)
 
-p2 <- qplot(data=data, x = factor(quality), y = chlorides)+ geom_boxplot()
-
-grid.arrange(p2,p1, ncol=2)
-
-ggplot(data= data,aes(clean.chlorides,color=quality,fill=quality,group=quality))
-      + geom_density()
+ggplot(data= data,aes(clean.chlorides,color=quality,fill=quality,group=quality)) + 
+       geom_density() 
+      
 
 ```
 
@@ -376,7 +441,7 @@ data$clean.totol.sulfur.dioxide <- remove_outliers(data$total.sulfur.dioxide)
 
 ggplot(data=data,aes(x=clean.totol.sulfur.dioxide, residual.sugar))+
   geom_point(position="jitter", alpha=0.5, size=0.75) +
-  xlab("clean total sulfur dioxide")
+  xlab("total sulfur dioxide (no outliers)")
 
 ```
 
@@ -492,13 +557,17 @@ at them by quality
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-qplot(data = data, x = density, y = alcohol, color=quality.cat) + 
-  ggtitle("density and alcohol categorized by quality")
+ggplot(data = data, aes(x = density, y = alcohol, color=quality.cat)) + 
+  geom_point(alpha=1/2) +
+  stat_smooth(method = "lm")+
+  ggtitle("Alcohol v/s Density colored by quality")
 
 ```
 
 There are some points at the top left telling a better quality wine is with
-more alcohol and less density. 
+more alcohol and less density. Also the linear model lines tell that we get 
+better quality at low density and high alcohol level. The good quality wines 
+are separable at these levels.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots}

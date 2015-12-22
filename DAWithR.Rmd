@@ -164,9 +164,8 @@ The plot shows that mostly the sugar is determined by keeping it low or high.
 #ggpairs(data = data,columns=2:13)
 
 #plotting the correlation matrix
-cormat <- cor(data[2:12], data[2:12])
-corrplot(cormat, method="number")
-
+#cormat <- cor(data[2:12], data[2:12])
+ggcorr(data[, 2:12], geom="blank", label=TRUE, label_size=3,label_round=2,hjust=0.7,color = "grey50",layout.exp = 3)
 ```
 
 For a quick overview of the data I plotted a scatterplot matrix of the variables to look at the correlation and the distribution with other variables. 

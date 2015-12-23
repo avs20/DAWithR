@@ -23,6 +23,7 @@ library(memisc)
 library(GGally)
 library(corrplot)
 library(gridExtra)
+source("https://raw.githubusercontent.com/briatte/ggcorr/master/ggcorr.R")
 
 
 
@@ -183,8 +184,8 @@ The plot shows that mostly the sugar is determined by keeping it low or high.
 
 #plotting the correlation matrix
 #cormat <- cor(data[2:12], data[2:12])
-ggcorr(data=data[2:12],geom="tile", label=TRUE, hjust=0.8,
-       layout.exp=1) +
+ggcorr(data=data[2:12],geom="tile", label=TRUE, hjust=0.9,
+       layout.exp=3 , nbreaks = 5, label_round =2) +
   ggplot2::labs(title="Correlation Values between features")
 
 ```
@@ -799,9 +800,8 @@ cormat <- cor(data[2:12], data[2:12])
 
 
 #corrplot(cormat,method="number",type="lower", diag=FALSE ,title="Correlation of Features",add=FALSE, mar=c(0,0,1,0),col="black")
-ggcorr(data=data[2:12],geom="tile", label=TRUE, hjust=0.8,
-       layout.exp=1, palette = "PuOr") +
-  
+ggcorr(data=data[2:12],geom="tile", label=TRUE, hjust=0.9,
+       layout.exp=3 , nbreaks = 5, label_round =2) +
   ggplot2::labs(title="Correlation Values between features")
 
 ```
@@ -854,3 +854,4 @@ than a blind guess.
 5. https://en.wikipedia.org/wiki/White_wine
 6. http://docs.ggplot2.org/0.9.3.1/guide_legend.html
 7. http://stackoverflow.com/a/4788102
+8. https://briatte.github.io/ggcorr/

@@ -84,47 +84,114 @@ summary(data$quality)
 Most the wines are of average quality. So we have few data points to delve into
 qualities. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+Lets take a look at other features.
 
-p1 <- qplot(fixed.acidity, data = data, geom="histogram")
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+
+qplot(fixed.acidity, data = data, geom="histogram")
 summary(data$fixed.acidity)
 
-p2 <- qplot(volatile.acidity, data = data, geom="histogram")
-#summary(data$volatile.acidity)
+```
 
-p3 <- qplot(citric.acid, data = data, geom="histogram")
-#summary(data$citric.acid)
+Above is the plot for fixed acidity (tartaric acid) which do not evaporate
+easily. The histogram gives a normal distribution with a clear peak in
+the middle.
 
-p4 <- qplot(chlorides, data = data, geom="histogram")
-#summary(data$chlorides)
+```{r echo=FALSE,message=FALSE,warning=FALSE}
 
-p5 <- qplot(free.sulfur.dioxide, data = data, geom="histogram")
-#summary(data$free.sulphur.dioxide)
-
-
-p6 <- qplot(density, data = data, geom="histogram")
-#summary(data$density)
-
-
-p7 <- qplot(pH, data = data, geom="histogram")
-#summary(data$pH)
-
-
-p8 <- qplot(sulphates, data = data, geom="histogram")
-#summary(data$sulphates)
-
-
-p9 <- qplot(alcohol, data = data, geom="histogram")
-#summary(data$alcohol)
-
-p10 <- qplot(residual.sugar, data=data, geom="histogram")
-
-
-#arrange the plots 
-grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,ncol=3)
-
+qplot(volatile.acidity, data = data, geom="histogram") + 
+  ggtitle("Histogram of volatile Acidity")
+summary(data$volatile.acidity)
 
 ```
+
+Above histogram of volatile acidity, the amount of acetic acid in wine, 
+which at too high of levels can lead to an unpleasant, vinegar taste
+
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+
+qplot(citric.acid, data = data, geom="histogram") + 
+  ggtitle("Histogram of Citric Acid")
+summary(data$citric.acid)
+
+```
+
+Citric Acid , found in small quantities, citric acid can add 'freshness' 
+and flavor to wines.
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+
+qplot(chlorides, data = data, geom="histogram") + 
+  ggtitle("Histogram of Chlorides")
+summary(data$chlorides)
+
+```
+
+Chlorides represents the amount of salt in the wine. The plot looks skewed as 
+most of the values are concentrated on the left side.
+
+
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+
+p1 <- qplot(total.sulfur.dioxide, data = data, geom="histogram") 
+summary(data$total.sulfur.dioxide)
+
+p2 <- qplot(free.sulfur.dioxide, data = data, geom="histogram") 
+summary(data$free.sulfur.dioxide)
+
+grid.arrange(p1,p2,ncol=2)
+
+```
+
+The above histograms show the free sulfur dioxide and total sulfur dioxide
+These prevent the microbial growth and oxidation of wine after it is packed.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+qplot(density, data=data, geom="histogram")
+summary(data$density)
+
+```
+
+The plot is almost normal and density represents the density of water. 
+It depends on alcohol content and sugar content. This needs to be looked at.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+qplot(pH, data=data, geom="histogram")
+summary(data$pH)
+
+```
+The pH value describes the acidity or the basicity of wine on a scale of 1-14.
+Most of the wines have values in 3-4 range as indicated in histogram.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+qplot(sulphates, data=data, geom="histogram")
+summary(data$sulphates)
+
+```
+
+The sulphates are an additive to wine to stop the microbial growth.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+qplot(alcohol, data=data, geom="histogram")
+summary(data$alcohol)
+
+```
+
+Alcohol represents the alcohol content of the wine in % by volume.
+
+To a layman, a wine looks like just alcohol and water but looking at these 
+physiochemical properties I get the idea that there is more to a wine than just
+alcohol. Now we dive deep into them.
+
 
 The residual sugar histogram is skewed so plotting it in log transformation we
 get 
@@ -826,15 +893,17 @@ to read formats.
 
 # Reflection
 
-This was an intense project compared previous. The data was just thrown and I
-needed to find the patterns. I chose the White Wines dataset as I didn't had 
-enough time to dig into other datasets and this was also a tidy one so I thought
-it will be easier. I started with exploring through the features and and then 
-finding relationship between them to making a model to predict the wine quality.
-Some features are correlated strongly and many are not. The prediction model
-doesn't do well as the features are variable throughout the quality level.
+This was an intense project compared to previous ones. The data was just thrown
+and I needed to find the patterns. I chose the White Wines dataset as I didn't 
+had enough time to dig into other datasets and this was also a tidy one so I 
+thought it will be easier. I started with exploring through the features and and
+then finding relationship between them to making a model to predict the wine 
+quality.Some features are correlated strongly and many are not. The prediction
+model doesn't do well as the features are variable throughout the quality level.
 There is also a strong bias towards the average quality wines as the data for 
-the high and poor quality is considerably less.
+the high and poor quality is considerably less. The plots with density,
+residual sugar and alcohol were most motivating as looking at them gave 
+some confidence of finding something. 
 
 The future work in this can be done with some more data about the good quality 
 wines. Using a better and calculated approach to feature selection can improve

@@ -23,7 +23,7 @@ library(memisc)
 library(GGally)
 library(corrplot)
 library(gridExtra)
-source("https://raw.githubusercontent.com/briatte/ggcorr/master/ggcorr.R")
+source("ggcorr.R")
 
 
 
@@ -726,23 +726,25 @@ problem of multicollinearty.
 ### Plot One
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_One}
 
-p1 <- qplot(data = data, x = residual.sugar, xlim = c(0,50)) +
+p1 <- ggplot(data = data, aes(x = residual.sugar), xlim = c(0,50)) +
+  geom_density(fill="#a6bddb")+
   ylab("Number of observations") +
   xlab("Residual Sugar") +
-  ggtitle("Histogram of Residual Sugar content in wine")+
   theme(text = element_text(size=14))
   
 
-p2 <- qplot(data=data, x = residual.sugar, binwidth = log10(1.05) , xlim=c(0,50))+
+p2 <- ggplot(data=data, aes(x = residual.sugar), binwidth = log10(1.05) , xlim=c(0,50))+
+  geom_density(fill="#a6bddb")+
   geom_vline(xintercept = mean(data$residual.sugar), color="red", show_guide=TRUE)+
   ylab("Number of Observations")+
   scale_x_log10("Residual Sugar (log10)")+
-  ggtitle("Histogram of Residual sugar content in wine") +
   scale_colour_manual(values=c('red'='median', 'black'='none'))+
   theme(text = element_text(size=14))
 
 
-grid.arrange(p1,p2,ncol=2)
+grid.arrange(p1,p2,ncol=2,
+            top ="Histogram of residual sugar in various scales")
+
 ```
 
 ### Description One
@@ -767,8 +769,8 @@ residual sugar and it is explored more in the next plot.
 ggplot(data =data, aes(x= alcohol, y = density, color=residual.sugar.cat)) +
   geom_point(alpha=1/2) +
   ggtitle("Distibution of density and alcohol classified by residual sugar.")+
-  xlab("Alcohol") +
-  ylab("Density") + 
+  xlab("Alcohol (% by vol.)") +
+  ylab("Density (g / cm^3)") + 
   scale_colour_discrete(name="Residul Sugar",
                         labels=c("Low (<0.52)","High (>0.52)")) +
   stat_smooth(method="lm")

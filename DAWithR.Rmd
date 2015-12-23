@@ -175,6 +175,7 @@ relationship between the wines and the sugar after fermentation.
 The plot shows that mostly the sugar is determined by keeping it low or high.
 
 # Bivariate Plots Section
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots}
 
 
@@ -187,18 +188,20 @@ ggcorr(data[, 2:12], geom="blank", label=TRUE, label_size=3,label_round=2,
 
 ```
 
-For a quick overview of the data I plotted a scatterplot matrix of the variables
-to look at the correlation and the distribution with other variables. 
+For a quick overview of the data I plotted a scatterplot matrix of the
+variables to look at the correlation and the distribution with other variables.
 
-Follwing strong correlations are found 
+Following strong correlations are found 
 
  - free sulphur dioxide and total sulphur dioxdie (0.616)
  - alcohol and quality (0.436)
  - fixed acidity and pH (0.426)
  - residual sugar and density (0.839)
 
-The scatter plot also shows many outliers here and there so I need to remove the
-outliers before further processing.
+The scatter plot also shows many outliers here and there so I need to remove
+the
+outliers before further processing.The correlation between density and pH 
+is **-0.9**.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Remove_Outliers}
@@ -219,20 +222,22 @@ ggplot(data = data, aes(x = density, y = pH))+
 
 ```
 
-From the above plot matrix a relationship between density and residual sugar 
-looks linear. Plotting them again 
+From the above pairs matrix a relationship between density and residual sugar 
+looks linear. The correlation between them is **0.83**
+Plotting them again 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-qplot(data = data , x = density, y = residual.sugar)+
-  geom_point() 
+ggplot(data = data , aes(x = density, y = remove_outliers(residual.sugar))) +
+  geom_point(alpha=1/4) +
+  stat_smooth(method="lm", color="darkred")
   
 #data$chlorides <- remove_outliers(data$chlorides)
 
 ```
 
 Since our categorical value and also output is only quality. Lets take a look 
-at how the values of different features spread with quality
+at how the values of different features relate with quality.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Feature_Box_Plots}
 
@@ -273,6 +278,7 @@ get almose same values of residual sugar for wines rated poor. It is inconclusiv
 to use residual sugar for discriminating wines.The median value is low than others
 
 Moving on to quality and chlorides
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Chlorides_and_Quality}
 
 pcl1 <- ggplot(data,aes(x=quality, y= chlorides))+
@@ -283,16 +289,18 @@ pcl1 <- ggplot(data,aes(x=quality, y= chlorides))+
 pcl2 <- ggplot(data,aes(x=quality, y= remove_outliers(chlorides)))+
   geom_boxplot()+
   ylab("Chlorides (no outliers)")+
-  ggtitle("Chlorides and quality")
+  ggtitle("Chlorides and quality")+
+  stat_summary(fun.y=mean, color="red",geom="point",shape=18,size=3)
+  
 
 grid.arrange(pcl1,pcl2,ncol=2)
 
 ```
 
 I have removed the outliers from the chlorides data as they were skewing the
-plot and we may be missing the big picture.From the box plot it is clear that 
-high quality wines have low chlorides. We will explore this aspect in detail
-later on.
+plot and we may be missing the big picture.The red point shows the mean values.
+From the box plot it is clear that high quality wines have low chlorides.
+We will explore this aspect in detail later on.
 
 The next feature is Free sulfur dioxide. Since *free sulfur dioxide* and
 *total sulfur dioxide* are correlated with almost linear relationship,looking
@@ -311,7 +319,7 @@ grid.arrange(ps1,ps2,ncol=2)
 ```
 
 The plot looks almost same except for scale which is obvious and there is also 
-strong correlation between them.
+strong correlation between them as shown in plot below.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -344,6 +352,16 @@ But no such patter emerges when we compare sulphates with the quality.
 
 ```
 
+Finally we have alcohol with quality. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+  ggplot(data,aes(x=quality, y=alcohol))+
+    geom_boxplot() +
+    ggtitle("Alcohol and Quality ")
+
+```
+
 
 
 These box plots above give us an average idea of what features change according
@@ -353,7 +371,7 @@ to quality. Some specific mentions are
 * density is also low for high quality wines
 * alcohol is high for high quality wines
 
-These comparisons give us an eye view of how individual features impact the
+These comparisons give us a bird-eye view of how individual features impact the
 quality of the wines. Now lets take an overview of how these features
 affect each other.
 
@@ -363,31 +381,34 @@ affect each other.
 
 data$clean.chlorides <- remove_outliers(data$chlorides)
 
-
 ggplot(data= data,aes(clean.chlorides,color=quality,fill=quality,group=quality)) + 
-       geom_density() 
-      
-
+       geom_density() +
+       ggtitle("Density histogram of chlorides")+
+       xlab("Chlorides")
 ```
 
 We get a clear picture that high quality rated wines have less chlorides.But 
 the correlation is not straight. Low quality rated wines (quality 3) also have
 less chlorides than the average. There may be other factors. 
 
-Taking another look at density and quality
+Taking another look at density feature and quality
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 data$clean.density <- remove_outliers(data$density)
 
 qplot(data = data, x= factor(quality), y = clean.density )+
-  geom_boxplot()
+  geom_boxplot()+
+  ylab("Density")+
+  xlab("Quality")+
+  ggtitle("Density and Quality")
 
-table(data$quality > 6)
+table(data$quality)
 
 ggplot(data= data,aes(clean.density,color=quality,fill=quality,group=quality)) +
-  geom_density()
-
+  geom_density()+
+  ggtitle("density histogram of wine \"Density\"")+
+  xlab("Wine Density")
 
 ```
 
@@ -432,36 +453,43 @@ ggplot(data = data,aes(x = pH, y = fixed.acidity))+
 
 ```
 
-It looks like a negative correlation between pH and **fixed.acidity** .
-The above plot also shows a linear regression line. 
+It looks like a negative correlation between pH and **fixed.acidity** which is 
+trivial as pH is an indicator of the acidity.The above plot also shows 
+a linear regression line. The correlation between pH and fixed acidity is 
+**-0.43**
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 data$clean.totol.sulfur.dioxide <- remove_outliers(data$total.sulfur.dioxide)
 
-ggplot(data=data,aes(x=clean.totol.sulfur.dioxide, residual.sugar))+
-  geom_point(position="jitter", alpha=0.5, size=0.75) +
-  xlab("total sulfur dioxide (no outliers)")
+ggplot(data=data,aes(x=clean.totol.sulfur.dioxide,
+                     remove_outliers(residual.sugar)))+
+                     geom_point(position="jitter", alpha=0.5, size=0.75) +
+                    xlab("total sulfur dioxide (no outliers)")+
+                    ylab("residual sugar (no outliers)")
+                    stat_smooth(method="lm", color="darkred")
+  
 
 ```
 
 There are too many points on the lower side of the residual sugar even after
 removing the outliers but on the upper side it shows a linear relationship.
+The correlation between residual sugar and total sufur dioxide is **0.41**
 
 Same relationships can also be found in between 
 
-* alcohol and residual.sugar
-* alcohol and total.sulfur.dioxide
+* alcohol and residual.sugar (correlation **-0.46**)
+* alcohol and total.sulfur.dioxide (correlation **-0.45**)
 
 Plots are below
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-qplot(data=data, x = alcohol, y = residual.sugar)+
+ggplot(data=data, aes(x = alcohol, y = residual.sugar))+
   geom_point(position="jitter", alpha=0.5, size=0.75)+
   stat_smooth(method="lm", col="red")
 
-qplot(data=data, x = alcohol, y = clean.totol.sulfur.dioxide)+
+ggplot(data=data, aes(x = alcohol, y = clean.totol.sulfur.dioxide))+
   geom_point(position="jitter", alpha=0.5, size=0.75)+
   stat_smooth(method="lm", col="red")
 
@@ -544,9 +572,9 @@ summary(data$residual.sugar.cat)
 
 * quality
 
-quality is cut into 3 catgegories of **poor, average and good**
+quality is cut into 3 categories of **poor, average and good**
 
-```{r ehco=FALSE}
+```{r ehco=FALSE, warning=FALSE, message=FALSE}
 
 summary(data$quality.cat)
 
@@ -558,9 +586,11 @@ at them by quality
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 ggplot(data = data, aes(x = density, y = alcohol, color=quality.cat)) + 
-  geom_point(alpha=1/2) +
+  geom_point(alpha=1/3, position="jitter") +
   stat_smooth(method = "lm")+
-  ggtitle("Alcohol v/s Density colored by quality")
+  ggtitle("Alcohol v/s Density colored by quality")+
+  scale_colour_manual(values=c("red", "#6666dd", "#00ff00"))
+
 
 ```
 
@@ -586,8 +616,11 @@ of the wines
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
   
-ggplot(data = data, aes(y = density, x= residual.sugar, color=quality.cat) ) +
-  geom_point(position="jitter", alpha=1/4)
+ggplot(data = data, aes(y = density,
+                        x= remove_outliers(residual.sugar),                                                   color=quality.cat) ) +
+      geom_point(position="jitter", alpha=1/2)+
+      stat_smooth(method="lm")+
+      xlab("Residual Sugar")
 
 ```
 

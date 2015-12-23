@@ -13,7 +13,7 @@ The code to generate the html file is in **DAWithR.rmd**
 #####The rmd file will not generate the plot matrix in the Bivariate
 analysis section. I have commented it as it takes 20-25 minutes on my
 machine to generate all the plots. To generate the plot remove the *#* at
-line 163
+line 250
 
 
 ##About ggcorr.R
